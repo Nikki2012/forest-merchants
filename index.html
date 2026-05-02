@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Лісові Комерсанти — ділова гра для всієї родини</title>
+<meta name="description" content="Українська настільна гра «Лісові Комерсанти» — розвиває фінансову грамотність, підприємницькі та лідерські навички у дітей від 6 років." />
+
+<!-- Шрифти -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+
+<!-- ============================================================ -->
+<!-- EmailJS SDK — потрібен для відправки форми                   -->
+<!-- ============================================================ -->
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+
+<style>
+  :root{
+    --bg:#f6f1e3; --fg:#3d2f20; --muted:#7a6a55;
+    --primary:#e07a3a; --primary-2:#c95f1f;
+    --secondary:#3d6b3f; --forest-deep:#1f3a23;
+    --accent:#f4c95d; --parchment:#f0e3c4; --parchment-2:#e6d3a3;
+    --bark:#5a4126; --border:#d9c79a;
+    --shadow-soft:0 8px 30px -10px rgba(31,58,35,.3);
+    --shadow-warm:0 12px 40px -12px rgba(224,122,58,.45);
+    --grad-cta:linear-gradient(135deg,#e88a45,#c95f1f);
+    --grad-parch:linear-gradient(135deg,#f0e3c4,#e2cf9a);
+    --grad-forest:linear-gradient(180deg,#3d6b3f,#1f3a23);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:"Nunito",system-ui,sans-serif;background:var(--bg);color:var(--fg);line-height:1.6}
+  h1,h2,h3,h4{font-family:"Fredoka",sans-serif;letter-spacing:-.01em;line-height:1.1}
+  img{max-width:100%;display:block}
+  a{color:inherit;text-decoration:none}
+  ul{list-style:none}
+
+  .container{max-width:1200px;margin:0 auto;padding:0 1rem}
+  .btn-cta{display:inline-flex;align-items:center;justify-content:center;gap:.5rem;
+    padding:1rem 2.25rem;border-radius:9999px;background:var(--grad-cta);color:#fff;
+    font-family:"Fredoka",sans-serif;font-weight:700;font-size:1.05rem;letter-spacing:.04em;
+    text-transform:uppercase;box-shadow:var(--shadow-warm);border:none;cursor:pointer;
+    transition:transform .25s, box-shadow .25s}
+  .btn-cta:hover{transform:translateY(-2px) scale(1.02)}
+  .btn-cta.full{width:100%}
+
+  .parchment{background:var(--grad-parch);border-radius:2rem;box-shadow:var(--shadow-soft);
+    border:1px solid var(--border);padding:2rem}
+  .wooden-sign{display:inline-block;background:linear-gradient(180deg,#7a5530,#5a3e22);
+    color:var(--parchment);border-radius:.75rem;padding:.5rem 1.25rem;font-family:"Fredoka",sans-serif;
+    font-weight:700;text-transform:uppercase;letter-spacing:.08em;font-size:.85rem;
+    box-shadow:inset 0 -3px 0 #3a2814, 0 6px 16px -6px rgba(40,20,5,.5)}
+
+  .leaf li{position:relative;padding-left:2rem;margin-bottom:.75rem}
+  .leaf li::before{content:"🌿";position:absolute;left:0;top:0}
+
+  /* HEADER */
+  header{position:absolute;top:0;left:0;right:0;z-index:50}
+  header .bar{display:flex;align-items:center;justify-content:space-between;padding:1.25rem 1rem;max-width:1200px;margin:0 auto}
+  header nav{display:none;gap:.25rem}
+  header nav a{padding:.5rem .85rem;border-radius:9999px;font-weight:600;font-size:.9rem;color:#fff;text-shadow:0 2px 8px rgba(0,0,0,.5);transition:background .2s}
+  header nav a:hover{background:rgba(255,255,255,.15)}
+  header .btn-cta{padding:.5rem 1.25rem;font-size:.85rem}
+  @media(min-width:1024px){ header nav{display:flex} }
+
+  /* HERO */
+  .hero{position:relative;min-height:100vh;display:flex;align-items:center;
+    padding:7rem 0 4rem;overflow:hidden}
+  .hero .bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .hero .overlay{position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.1),rgba(0,0,0,.3))}
+  .hero .grid{position:relative;display:grid;gap:2.5rem;align-items:center}
+  @media(min-width:1024px){ .hero .grid{grid-template-columns:1fr 1fr} }
+  .hero h1{font-size:clamp(2.5rem,7vw,4.5rem);font-weight:700;margin-top:.75rem}
+  .hero h1 span{color:var(--primary)}
+  .hero .tag{font-family:"Fredoka",sans-serif;text-transform:uppercase;letter-spacing:.2em;
+    color:var(--secondary);font-weight:600;font-size:.95rem}
+  .hero .lead{margin-top:1.25rem;font-size:1.15rem;font-weight:600}
+  .hero .img-wrap{display:none;justify-content:center}
+  .hero .img-wrap img{max-width:420px;border-radius:2rem;box-shadow:0 20px 60px -20px rgba(0,0,0,.5);animation:float 6s ease-in-out infinite}
+  @media(min-width:1024px){ .hero .img-wrap{display:flex} }
+
+  @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+  @keyframes sway{0%,100%{transform:rotate(-2deg)}50%{transform:rotate(2deg)}}
+  .sway{animation:sway 4s ease-in-out infinite}
+
+  /* SECTIONS */
+  section{padding:5rem 0}
+  .section-head{text-align:center;max-width:760px;margin:0 auto 3rem}
+  .section-head h2{font-size:clamp(1.75rem,4vw,3rem);font-weight:700;margin-top:1rem}
+  .section-head p{margin-top:1.25rem;color:var(--muted);font-size:1.1rem}
+  .text-primary{color:var(--primary)}
+  .text-secondary{color:var(--secondary)}
+
+  .grid-3{display:grid;grid-template-columns:1fr;gap:1.5rem}
+  @media(min-width:640px){.grid-3{grid-template-columns:1fr 1fr}}
+  @media(min-width:1024px){.grid-3{grid-template-columns:repeat(3,1fr)}}
+  .grid-2{display:grid;grid-template-columns:1fr;gap:2.5rem;align-items:center}
+  @media(min-width:768px){.grid-2{grid-template-columns:1fr 1fr}}
+
+  .benefit{text-align:center;transition:transform .25s}
+  .benefit:hover{transform:scale(1.03)}
+  .benefit .emoji{font-size:2.25rem;margin-bottom:.75rem}
+  .benefit p{font-family:"Fredoka",sans-serif;font-weight:700;font-size:1.1rem;color:var(--secondary)}
+
+  .forest-bg{background:var(--grad-forest);color:#fff}
+  .forest-bg h2{color:#fff}
+
+  .character{text-align:center;transition:transform .3s}
+  .character:hover{transform:translateY(-8px)}
+  .character .img-box{height:200px;display:flex;align-items:center;justify-content:center;margin-bottom:1rem}
+  .character .img-box img{max-height:200px;width:auto;filter:drop-shadow(0 12px 16px rgba(0,0,0,.25))}
+  .character h3{font-size:1.2rem;color:var(--secondary);font-weight:700}
+  .character p{margin-top:.75rem;color:var(--fg);opacity:.85}
+
+  /* PACKAGES */
+  .pkg{display:flex;flex-direction:column;text-align:center;position:relative}
+  .pkg.featured{box-shadow:0 0 0 4px var(--primary),var(--shadow-soft)}
+  .pkg .badge{position:absolute;top:-1rem;left:50%;transform:translateX(-50%);font-size:.7rem}
+  .pkg h3{font-size:1.2rem;color:var(--secondary);min-height:3.5rem}
+  .pkg .desc{margin-top:1rem;color:var(--fg);opacity:.8;flex-grow:1}
+  .pkg .price{margin-top:1.5rem;font-size:2.25rem;font-family:"Fredoka",sans-serif;font-weight:700;color:var(--primary)}
+  .pkg .btn-cta{margin-top:1.5rem}
+
+  /* REVIEWS */
+  .review .stars{color:var(--primary);font-size:1.25rem}
+  .review .text{margin-top:.75rem;font-style:italic}
+  .review .name{margin-top:1rem;font-family:"Fredoka",sans-serif;font-weight:700;color:var(--secondary)}
+
+  /* ORDER */
+  .order{position:relative;overflow:hidden;color:#fff}
+  .order .bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .order .overlay{position:absolute;inset:0;background:rgba(61,107,63,.85)}
+  .order .inner{position:relative;max-width:880px;margin:0 auto;padding:0 1rem}
+  .order h2{font-size:clamp(1.75rem,4vw,3rem);text-align:center}
+  .order .price-tag{margin-top:1rem;font-family:"Fredoka",sans-serif;font-weight:700;color:var(--accent);font-size:1.6rem;text-align:center}
+  form.parchment{margin-top:2.5rem;color:var(--fg)}
+  form h3{font-size:1.4rem;color:var(--secondary);text-align:center;margin-bottom:1rem}
+  form label{display:block;font-weight:600;margin-bottom:.4rem;font-size:.95rem}
+  form .field{margin-bottom:1.1rem}
+  form input,form select{width:100%;padding:.85rem 1rem;border:2px solid var(--border);
+    border-radius:.85rem;font-size:1rem;background:#fff;font-family:inherit;transition:border-color .2s}
+  form input:focus,form select:focus{outline:none;border-color:var(--primary)}
+  .form-msg{text-align:center;margin-top:1rem;font-weight:600}
+  .form-msg.ok{color:var(--secondary)}
+  .form-msg.err{color:#c0392b}
+
+  footer{background:var(--forest-deep);color:rgba(255,255,255,.85);padding:2.5rem 0;text-align:center}
+  footer p:first-child{font-family:"Fredoka",sans-serif;font-weight:700;color:#fff;font-size:1.15rem}
+  footer p:last-child{margin-top:.5rem;font-size:.9rem;opacity:.8}
+</style>
+</head>
+<body>
+
+<!-- ============================================================ -->
+<!-- 🖼️  МІСЦЯ ДЛЯ ВАШИХ КАРТИНОК                                 -->
+<!-- Просто замініть значення src="ТУТ_ПОСИЛАННЯ_НА_ФОТО"        -->
+<!-- на пряме посилання (URL) або шлях до файлу.                 -->
+<!-- ============================================================ -->
+
+<header>
+  <div class="bar">
+    <a href="#top" class="wooden-sign">🌲 Лісові Комерсанти</a>
+    <nav>
+      <a href="#about">Про гру</a>
+      <a href="#characters">Персонажі</a>
+      <a href="#benefits">Переваги</a>
+      <a href="#audience">Для кого</a>
+      <a href="#packages">Комплекти</a>
+      <a href="#reviews">Відгуки</a>
+      <a href="#order">Замовити</a>
+    </nav>
+    <a href="#order" class="btn-cta">Замовити</a>
+  </div>
+</header>
+
+<!-- HERO -->
+<section class="hero" id="top">
+  <!-- 🖼️ ФОН HERO -->
+  <img class="bg" src="https://i.postimg.cc/KYR2kJ14/BG-02-02-compres.jpg" alt="Чарівний ліс">
+  <div class="overlay"></div>
+  <div class="container grid">
+    <div class="parchment">
+      <p class="tag">Ділова гра для всієї родини</p>
+      <h1>ЛІСОВІ<br><span>КОМЕРСАНТИ</span></h1>
+      <p class="lead">Розвиває підприємницькі та лідерські навички, вміння комунікувати та взаємодіяти в команді</p>
+      <ul class="leaf" style="margin-top:1.5rem">
+        <li>Діти пізнають ази фінансової грамотності</li>
+        <li>Навчає усному математичному рахунку</li>
+        <li>Пробуджує бажання швидко читати</li>
+        <li>Допомагає швидше навчитись множенню, діленню, розуміти дробові числа</li>
+      </ul>
+      <div style="margin-top:2rem"><a href="#order" class="btn-cta">Замовити гру</a></div>
+    </div>
+    <div class="img-wrap">
+      <!-- 🖼️ КОРОБКА ГРИ -->
+      <img src="https://i.postimg.cc/1tKXMvrW/Lisovi-Komersanti-4-0-png.webp" alt="Коробка гри Лісові Комерсанти">
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="container">
+    <div class="section-head">
+      <span class="wooden-sign">Про гру</span>
+      <h2>Гру «Лісові Комерсанти» ми створювали для дітей.<br><span class="text-primary">Чому для нас це стало важливо?</span></h2>
+      <p>Ми побачили, що всі діти навколо грають в економічну гру, де закладений принцип «знищ свого сусіда». Тобто, щоб стати успішним, треба збанкрутувати інших гравців і лише так ти виграєш. Ви всі знаєте цю гру, бо всі діти в неї грають.</p>
+    </div>
+
+    <h3 style="text-align:center;font-size:clamp(1.4rem,2.5vw,2rem);font-weight:700">
+      В результаті ми розробили гру, яка вчить як дітей,<br>так і дорослих:
+    </h3>
+    <div class="grid-3" style="margin-top:2.5rem">
+      <div class="parchment benefit"><div class="emoji">🎯</div><p>досягати своєї мети</p></div>
+      <div class="parchment benefit"><div class="emoji">🤝</div><p>формувати позитивні стосунки між собою</p></div>
+      <div class="parchment benefit"><div class="emoji">💰</div><p>примножувати капітал</p></div>
+      <div class="parchment benefit"><div class="emoji">🧡</div><p>допомагати у скрутному становищі</p></div>
+      <div class="parchment benefit"><div class="emoji">💪</div><p>посилювати один одного</p></div>
+      <div class="parchment benefit"><div class="emoji">🦋</div><p>ставати фінансово вільною людиною</p></div>
+    </div>
+
+    <div style="text-align:center;margin-top:3rem"><a href="#order" class="btn-cta">Хочу придбати гру</a></div>
+  </div>
+</section>
+
+<!-- HOW IT GOES -->
+<section class="forest-bg">
+  <div class="container">
+    <h2 style="text-align:center;font-size:clamp(1.75rem,4vw,3rem);margin-bottom:3rem">Як відбувається гра?</h2>
+
+    <div class="grid-2">
+      <!-- 🖼️ ПОЛЕ ГРИ -->
+      <img src="https://i.postimg.cc/Pq9PPL5G/LK-Pole-lotok-versia-3-01.png" alt="Поле гри" style="border-radius:2rem;box-shadow:0 20px 60px -20px rgba(0,0,0,.5)">
+      <div class="parchment">
+        <p><strong>«Лісові комерсанти»</strong> — це українська інноваційна ділова настільна гра.</p>
+        <p style="margin-top:1rem">Події відбуваються в чарівному лісі, де гравці виступають у ролі бізнесменів-комерсантів, які мріють стати найуспішнішими у світі комерції.</p>
+        <p style="margin-top:1rem;font-weight:700">Завдяки спеціальним завданням гравці навчаються приймати фінансові рішення та будувати партнерські стосунки.</p>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-top:4rem">
+      <div class="parchment" style="order:2">
+        <p>Кожен персонаж гри має свою роль: менеджер-банкір, податківець, підприємець, власник бізнесу та керівник благодійного фонду.</p>
+        <p style="margin-top:1rem">Між гравцями розвиваються дуже цікаві взаємодії, що сприяє розвитку сучасних ділових навичок (soft skills).</p>
+        <p style="margin-top:1rem;font-weight:700">Ціль гри — примножити капітал, але у «Лісових комерсантах» кожен учасник переможець!</p>
+      </div>
+      <!-- 🖼️ РОДИНА ГРАЄ -->
+      <img src="https://i.postimg.cc/wjBrBMrt/instagram-10801080-(1).png" alt="Родина грає" style="border-radius:2rem;box-shadow:0 20px 60px -20px rgba(0,0,0,.5);order:1">
+    </div>
+
+    <div class="parchment" style="margin:4rem auto 0;max-width:760px;color:var(--fg)">
+      <h3 style="color:var(--secondary);font-size:1.5rem;margin-bottom:1rem">Комплект гри включає:</h3>
+      <ul class="leaf">
+        <li>Коробка</li>
+        <li>Лоток для банку</li>
+        <li>Ігрове поле А2-формат (двостороння версія українською та англійською мовою).</li>
+        <li>Брошура правил</li>
+        <li>Фішки ігрові (8шт)</li>
+        <li>Картки легенд (7шт)</li>
+        <li>Картка ігрових ділянок</li>
+        <li>Ігрові картки "Інвестиції" (32шт)</li>
+        <li>Ігрові картки "Лікарня" (8шт)</li>
+        <li>Ігрові картки "Витрати" (8шт)</li>
+        <li>Ігрові картки "Повідомлення" (16шт)</li>
+        <li>Комплект ігрових грошей</li>
+        <li>Кубик ігровий</li>
+      </ul>
+      <p style="margin-top:1.5rem;padding:1rem;background:rgba(244,201,93,.4);border-left:4px solid var(--primary);border-radius:1rem;font-weight:600">
+        + Відео-курс у комплекті гри для батьків та вчителів для отримання максимальної користі від ігрового процесу
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- CHARACTERS -->
+<section id="characters">
+  <div class="container">
+    <div class="section-head">
+      <span class="wooden-sign">Персонажі</span>
+      <h2>Персонажі та валюта гри</h2>
+    </div>
+    <div class="grid-3">
+      <article class="parchment character">
+        <div class="img-box"><img class="sway" src="https://i.postimg.cc/tJmdTqfM/Lisovi-Komers-20-ved-png.webp" alt="Ведмідь"></div>
+        <h3>Справедливий Ведмідь / Ведмедиця</h3>
+        <p>Як справжній хазяїн лісу контролює всі бізнес-операції з грошима, відповідає за справедливість та порядок під час гри.</p>
+      </article>
+      <article class="parchment character">
+        <div class="img-box"><img class="sway" src="https://i.postimg.cc/4yFvdfM2/Lisovi-Komers-20-Ole-png.webp" alt="Олень"></div>
+        <h3>Благородний Олень / Олениха</h3>
+        <p>Займається благородною справою — допомагає та турбується про тих, хто опинився в скрутному становищі.</p>
+      </article>
+      <article class="parchment character">
+        <div class="img-box"><img class="sway" src="https://i.postimg.cc/nrLYpjRb/Lisovi-Komers-20-Lis-png.webp" alt="Лис"></div>
+        <h3>Мудрий Лис / Лисичка</h3>
+        <p>Мудрий мисливець-підприємець — полює на вигідні бізнеси, інвестує кошти та розвиває власну справу або продає послуги іншим гравцям.</p>
+      </article>
+      <article class="parchment character">
+        <div class="img-box"><img class="sway" src="https://i.postimg.cc/VvH96fTG/Lisovi-Komers-20-ore-png.webp" alt="Орел"></div>
+        <h3>Швидкий Орел / Орлиця</h3>
+        <p>Має швидко доставляти (читати вголос) повідомлення для всіх, тому що він власник фірми «Птахофлот».</p>
+      </article>
+      <article class="parchment character">
+        <div class="img-box"><img class="sway" src="https://i.postimg.cc/1XY0tmTY/Lisovi-Komers-20-vov-png.webp" alt="Вовк"></div>
+        <h3>Чесний Вовк / Вовчиця</h3>
+        <p>Виконуючи роль податківця, має чесно рахувати та слідкувати, щоб з кожної угоди сплачувались податки.</p>
+      </article>
+      <article class="parchment character">
+        <div class="img-box"><img src="https://i.postimg.cc/8cnd5p33/Zmiyky-01-png.webp" alt="Срібники та Златники"></div>
+        <h3>Цілющий Змій/Змійка</h3>
+        <p>Відповідає за здоров'я лісових мешканців, надає їм медичні послуги, займається заготівлею медичних речовин для приготування лікарських засобів.</p>
+      </article>
+      <article class="parchment character">
+        <div class="img-box"><img src="https://i.postimg.cc/D0zdnJj3/Kotiki-01-png.webp" alt="Мобільний Кіт/Киця"></div>
+        <h3>Мобільний Кіт/Киця</h3>
+        <p>Сучасний підприємець - володіє салоном мобільного зв'язку, полює на вигідні бізнеси, інвестує кошти та розвиває власну справу.</p>
+      </article>
+    </div>
+    <div style="text-align:center;margin-top:3rem"><a href="#order" class="btn-cta">Замовити гру</a></div>
+  </div>
+</section>
+
+<!-- BENEFITS -->
+<section id="benefits" class="forest-bg">
+  <div class="container" style="max-width:900px;text-align:center">
+    <span class="wooden-sign">Переваги</span>
+    <h2 style="margin-top:1rem">Чим корисна гра?</h2>
+    <p style="margin-top:1.25rem;font-family:'Fredoka',sans-serif;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.05em;font-size:1.2rem">
+      Під час гри «Лісові Комерсанти» «прокачуються» необхідні для успішного життя опції:
+    </p>
+    <div class="parchment" style="margin-top:2.5rem;text-align:left;color:var(--fg)">
+      <ul class="leaf">
+        <li>мистецтво переговорів, вміння комунікувати</li>
+        <li>взаємодіяти в команді, артистичні здібності</li>
+        <li>усний математичний рахунок, читання</li>
+        <li>моделі прийняття ефективних рішень та багато іншого</li>
+      </ul>
+      <p style="margin-top:1.5rem;font-weight:600;color:var(--secondary)">
+        Гравці пізнають ази фінансової грамотності, розвивають підприємницькі та лідерські навички.
+      </p>
+      <p style="margin-top:1rem">І як бонус — діти починають краще розуміти батьків і більш шанобливо ставляться до грошей, які ними зароблені.</p>
+    </div>
+  </div>
+</section>
+
+<!-- AUDIENCE -->
+<section id="audience">
+  <div class="container">
+    <div class="section-head">
+      <span class="wooden-sign">Для кого</span>
+      <h2>Для кого підходить гра?</h2>
+    </div>
+    <div class="grid-2" style="margin-bottom:3rem">
+      <div class="parchment" style="text-align:center">
+        <div style="font-size:3rem">🧒</div>
+        <h3 style="color:var(--primary);font-size:1.5rem;margin-top:.5rem">Гра для віку від 6 до 99 років</h3>
+        <p style="margin-top:.75rem">Особливо корисна вона дітям від <strong>8–12 років</strong>.</p>
+      </div>
+      <div class="parchment" style="text-align:center">
+        <div style="font-size:3rem">👴</div>
+        <h3 style="color:var(--primary);font-size:1.5rem;margin-top:.5rem">«Дядям та тьотям» за 40 вона буде також цікавою :)</h3>
+        <p style="margin-top:.75rem">Тим більше, якщо грати разом зі своїми дітьми чи онуками.</p>
+      </div>
+    </div>
+
+    <div class="parchment" style="max-width:880px;margin:0 auto;text-align:center">
+      <h3 style="color:var(--secondary);font-size:1.5rem;text-transform:uppercase">Пропонуємо вам долучитись до гри разом з дітьми</h3>
+      <p style="margin-top:1.25rem">Повірте, це буде дуже чарівний час, який ви можете провести не просто разом, а зі спільною цікавою та корисною ігровою справою!</p>
+      <p style="margin-top:1rem;font-weight:600">В «Лісові Комерсанти» можна грати в родинному колі чи з друзями в школі, під час мандрівки в потягу чи під час відпочинку на галявині, коли за вікном негода чи коли світить сонечко, вранці, вдень та ввечері, взимку та влітку…</p>
+      <p style="margin-top:1rem">Можна грати годинку, а можна декілька годин. Головне — в цю гру можна грати багато разів і кожного разу відкривати для себе нові ігрові можливості та розвивати в собі нові якості. Тому — просто починайте грати!</p>
+      <div style="margin-top:2rem"><a href="#order" class="btn-cta">Замовити гру</a></div>
+    </div>
+  </div>
+</section>
+
+<!-- PACKAGES -->
+<section id="packages" class="forest-bg">
+  <div class="container">
+    <div class="section-head">
+      <span class="wooden-sign">Комплекти</span>
+      <h2>Комплекти для замовлення</h2>
+    </div>
+    <div class="grid-3">
+      <div class="parchment pkg">
+        <h3>Ділова гра «Лісові Комерсанти»</h3>
+        <p class="desc">Базовий комплект гри з усіма необхідними матеріалами для захопливих сімейних вечорів.</p>
+        <p class="price">990 грн</p>
+        <a href="#order" class="btn-cta">Замовити</a>
+      </div>
+      <div class="parchment pkg featured">
+        <span class="badge wooden-sign">⭐ Хіт продажів</span>
+        <h3>Гра + книга «Мрія на мільйон. Рушай у світ бізнесу та грошей»</h3>
+        <p class="desc">Разом — вигідніше! Цікавий та корисний комплект для родин, в яких є діти середнього та старшого шкільного віку. Буде що почитати та в що пограти всією родиною.</p>
+        <p class="price">1200 грн</p>
+        <a href="#order" class="btn-cta">Замовити</a>
+      </div>
+      <div class="parchment pkg">
+        <h3>Комплект UKR + ENG</h3>
+        <p class="desc">Двомовна версія гри — чудова можливість поєднати розваги, навчання фінансовій грамотності та практику англійської.</p>
+        <p class="price">1400 грн</p>
+        <a href="#order" class="btn-cta">Замовити</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- REVIEWS -->
+<section id="reviews">
+  <div class="container">
+    <div class="section-head">
+      <span class="wooden-sign">Відгуки</span>
+      <h2>Відгуки про гру</h2>
+    </div>
+    <div class="grid-3">
+      <article class="parchment review"><div class="stars">★★★★★</div><p class="text">«Дитина в захваті! Грали всією родиною на вихідних — дуже захопливо й корисно. Син почав сам рахувати решту в магазині!»</p><p class="name">— Олена</p></article>
+      <article class="parchment review"><div class="stars">★★★★★</div><p class="text">«Чудова альтернатива «Монополії». Тут немає духу руйнування — навпаки, діти вчаться співпрацювати та домовлятися.»</p><p class="name">— Андрій</p></article>
+      <article class="parchment review"><div class="stars">★★★★★</div><p class="text">«Купили доньці на день народження. Гра захоплює і дітей, і дорослих. Якісне виконання, яскраві ілюстрації.»</p><p class="name">— Марія</p></article>
+      <article class="parchment review"><div class="stars">★★★★★</div><p class="text">«Як вчитель — рекомендую для шкільних гуртків. Діти включаються миттєво, а потім ще довго обговорюють стратегії.»</p><p class="name">— Сергій</p></article>
+      <article class="parchment review"><div class="stars">★★★★★</div><p class="text">«Найкраща сімейна настілка з тих, що ми пробували. Відео-курс для батьків — велика додаткова цінність.»</p><p class="name">— Тетяна</p></article>
+      <article class="parchment review"><div class="stars">★★★★★</div><p class="text">«Замовляли разом з книгою. Син прочитав за тиждень і одразу захотів пограти ще. Дякую авторам!»</p><p class="name">— Володимир</p></article>
+    </div>
+  </div>
+</section>
+
+<!-- ORDER -->
+<section id="order" class="order">
+  <!-- 🖼️ ФОН ФОРМИ ЗАМОВЛЕННЯ -->
+  <img class="bg" src="https://i.postimg.cc/DzrwyxHG/BG-01-compres.jpg" alt="">
+  <div class="overlay"></div>
+  <div class="inner">
+    <h2>Замовляйте гру «Лісові Комерсанти»</h2>
+    <p style="margin-top:1rem;text-align:center;font-size:1.1rem">
+      У вартість гри включено <strong>відео-курс для батьків та вчителів</strong> для отримання максимальної користі від ігрового процесу
+    </p>
+    <p class="price-tag">Ціна інвестиції у майбутнє вашої дитини — від 990 грн!</p>
+
+    <form id="order-form" class="parchment">
+      <h3>Щоб оформити замовлення, заповніть форму</h3>
+
+      <div class="field">
+        <label for="name">Ваше ім'я та прізвище</label>
+        <input id="name" name="name" type="text" required>
+      </div>
+      <div class="field">
+        <label for="phone">Ваш номер телефону для зв'язку у Gmail або Telegram</label>
+        <input id="phone" name="phone" type="tel" placeholder="+380" required>
+      </div>
+      <div class="field">
+        <label for="address">Вкажіть адресу для доставки</label>
+        <input id="address" name="address" type="text" required>
+      </div>
+      <div class="field">
+        <label for="package">Оберіть варіант замовлення</label>
+        <select id="package" name="package" required>
+          <option value="" disabled selected>Оберіть комплект…</option>
+          <option>990 грн — «Лісові Комерсанти» базовий комплект</option>
+          <option>1200 грн — «Лісові Комерсанти» та книга «Мрія на мільйон»</option>
+          <option>1400 грн — «Лісові Комерсанти» комплект UKR + ENG</option>
+        </select>
+      </div>
+
+      <button type="submit" class="btn-cta full" id="submit-btn">Надіслати замовлення</button>
+      <p id="form-msg" class="form-msg"></p>
+    </form>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <p>🌲 Лісові Комерсанти</p>
+    <p>© <span id="year"></span> Ділова гра для всієї родини. Усі права захищені.</p>
+  </div>
+</footer>
+
+<!-- ============================================================ -->
+<!-- ✉️  EMAILJS — НАЛАШТУВАННЯ                                   -->
+<!-- ============================================================ -->
+<!--
+  Як налаштувати:
+  1) Зареєструйтеся на https://www.emailjs.com/
+  2) Створіть Email Service (Gmail, Outlook та ін.) — отримаєте SERVICE_ID
+  3) Створіть Email Template — отримаєте TEMPLATE_ID
+     У шаблоні використайте змінні: {{name}}, {{phone}}, {{address}}, {{package}}
+  4) В Account → API Keys скопіюйте PUBLIC_KEY
+  5) Підставте три значення нижче замість YOUR_...
+-->
+<script>
+  // 🔑 ВСТАВТЕ СВОЇ ДАНІ ТУТ:
+  const EMAILJS_PUBLIC_KEY = "YOUR_PUBLIC_KEY";   // <-- сюди Public Key з EmailJS
+  const EMAILJS_SERVICE_ID = "YOUR_SERVICE_ID";   // <-- сюди Service ID
+  const EMAILJS_TEMPLATE_ID = "YOUR_TEMPLATE_ID"; // <-- сюди Template ID
+
+  // Ініціалізація EmailJS
+  emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
+
+  document.getElementById("year").textContent = new Date().getFullYear();
+
+  const form = document.getElementById("order-form");
+  const msg = document.getElementById("form-msg");
+  const btn = document.getElementById("submit-btn");
+
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    msg.textContent = "";
+    msg.className = "form-msg";
+    btn.disabled = true;
+    btn.textContent = "Надсилаємо…";
+
+    const params = {
+      name: form.name.value,
+      phone: form.phone.value,
+      address: form.address.value,
+      package: form.package.value,
+    };
+
+    emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, params)
+      .then(function () {
+        msg.textContent = "✅ Дякуємо! Ми зв'яжемося з вами найближчим часом.";
+        msg.className = "form-msg ok";
+        form.reset();
+      })
+      .catch(function (err) {
+        console.error("EmailJS error:", err);
+        msg.textContent = "❌ Помилка відправки. Спробуйте ще раз або напишіть нам у Viber/Telegram.";
+        msg.className = "form-msg err";
+      })
+      .finally(function () {
+        btn.disabled = false;
+        btn.textContent = "Надіслати замовлення";
+      });
+  });
+</script>
+
+</body>
+</html>
